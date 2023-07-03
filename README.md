@@ -1,5 +1,5 @@
 This repository contains the source code for the paper "An Order-Theoretic Perspective on Rank Estimation" available [here](https://doi.org/10.13140/RG.2.2.22519.19368).  The source code for associated `R` package is available [here](https://github.com/jkrising/orderRanks).  This package contains the data analyzed in section 9.  See the package documentation for a description of the data.
 
-The scripts associated with this paper are called in [R/runall.R](R/runall.R).  The packages required to run them are listed in [R/imports.R](R/imports.R).  The output stored in this repository was produced using `R` 4.3 with all packages up to date as of 2023-06-14.
+The scripts associated with this paper are called in [R/runall.R](R/runall.R).  The packages required to run them are listed in [R/imports.R](R/imports.R).  The output stored in this repository was produced using `R` 4.3.1 with all packages up to date as of 2023-07-03.
 
 The text of this paper is released under the [CC-BY license](LICENSE.md) and the scripts are released under the [MIT license](R/LICENSE.md).

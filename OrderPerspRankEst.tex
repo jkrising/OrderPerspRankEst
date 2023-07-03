@@ -81,12 +81,12 @@
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem{question}[theorem]{Question}
 
-\defcitealias{oeis2023seqA000670}{OEIS A000670\nocite{oeis2023seqA000670}}
+\defcitealias{oeisA000670}{OEIS A000670\nocite{oeisA000670}}
 
 \begin{document}
 
 \title{An Order-Theoretic Perspective on Rank Estimation}
-\author{Justin Rising\\jkrising@gmail.com\\Boston, MA}
+\author{Justin Rising\thanks{email: \texttt{jkrising@gmail.com}}\\Boston, MA}
 \maketitle
 
 \begin{abstract}
@@ -107,15 +107,13 @@ This problem has been recognized at least since~\cite{goldstein1996tables} and h
 \label{fig_example}
 \end{figure}
 
-Since there are only finitely many rankings that can be obtained by picking one point from each interval, the problem is combinatorial.  In particular, we are dealing with order theory, a branch of combinatorics that studies relations that can be interpreted as orders as long as we do not require every pair of elements to be comparable.
-
-In this paper, I will formalize the idea of~\cite{klein2020jointCR} in order-theoretic terms.  The key result is a characterization of the uncertainty in the estimated rank in terms of the uncertainty in the estimated parameters.  This order-theoretic perspective enables us to develop a theory of rank estimation, and I will show how it can be applied to form point estimates and set estimates of the population ranking and to quantify the uncertainty in these estimates.
+Since there are only finitely many rankings that can be obtained by picking one point from each interval, the problem is combinatorial.  In particular, we are dealing with order theory, a branch of combinatorics that studies relations that can be interpreted as orders as long as we do not require every pair of elements to be comparable.  Our first task will therefore be to describe the idea of~\cite{klein2020jointCR} in order-theoretic terms.  The key result is a characterization of the uncertainty in the estimated rank in terms of the uncertainty in the estimated parameters.  This order-theoretic perspective enables us to develop a theory of rank estimation, and I will show how it can be applied to form point estimates and set estimates of the population ranking and to quantify the uncertainty in these estimates.
 
 Many of the methods that have been developed for problems related to rank estimation so far fail in the case where the unknown parameters are not necessarily distinct~\citep{hall2009bootstrap, xie2009ties}.  The solutions that have been proposed come with the correct theoretical guarantees but do not follow from any more general theory.  The order-theoretic perspective, on the other hand, allows us to see this case as a minor variation of the case where the parameters are equal, and the methods that we develop will work in either case.
 
-While I believe that this represents a significant advance, the material in this paper is by no means the last word on any of the problems involved in rank estimation.  I do not attempt to address problems in hypothesis testing or visualization (but see~\cite{fattore2014visualizing} for the latter).  In addition, the methods described here are the most obvious, and while they have nice theoretical properties, none of them clearly dominates other approaches.  In order to facilitate experimentation with these methods, I provide implementations in the \texttt{R} package \texttt{orderRanks}.
+While I believe that this represents a significant advance, the material in this paper is by no means the last word on any of the problems involved in rank estimation.  We will not consider problems related to hypothesis testing or visualization (but see~\cite{fattore2014visualizing} for the latter).  In addition, the methods described here are the most obvious, and while they have nice theoretical properties, none of them clearly dominates other approaches.  In order to facilitate experimentation with these methods, implementations are provided in the \texttt{R} package \texttt{orderRanks}.
 
-The remainder of this paper is laid out as follows.  First in section~\ref{sec_bkgd} I give the necessary background in order theory for the material to follow.  Then in sections~\ref{sec_theory} and~\ref{sec_rank_int}, I lay out the basic theory that will inform all subsequent discussions.  In sections~\ref{sec_conf_set},~\ref{sec_point_est} and~\ref{sec_uncert_quant} I apply that theory to the problems of set estimation, point estimation and uncertainty quantification respectively and derive methods for all of these problems.  Finally in sections~\ref{sec_sim} and~\ref{sec_data} I apply those methods to both simulated and real data in order to examine their behavior and suggest possible topics for future research.
+The remainder of this paper is laid out as follows.  First in section~\ref{sec_bkgd} we will discuss the necessary order-theoretic concepts and vocabulary for the remainder of the paper.  Then in sections~\ref{sec_theory} and~\ref{sec_rank_int} we will develop the basic theory that will inform all subsequent discussions.  In sections~\ref{sec_conf_set},~\ref{sec_point_est} and~\ref{sec_uncert_quant} we will see how the theory applies to the problems of set estimation, point estimation and uncertainty quantification respectively and then derive methods for all of these problems.  Finally in sections~\ref{sec_sim} and~\ref{sec_data} we will discuss the results of applying those methods to both simulated and real data with an emphasis on possible directions for future research.
 
 \section{An Incomplete Introduction to Order Theory}
 \label{sec_bkgd}
@@ -227,6 +225,7 @@ Theorem~\ref{thm_main} does not hold if we allow pairs of intervals to intersect
 Here we continue our development of the theory by introducing the notion of rank intervals.  These intervals were used as confidence intervals for the population ranks in~\cite{klein2020jointCR}, but as we will see they are useful more generally.  We will begin by defining the rank intervals in order-theoretic terms, discuss how to compute them efficiently, and finally show that they are a natural generalization of the idea of a rank to interval orders.
 
 \subsection{Basic Definitions and Results}
+\label{subsec_rank_int_basics}
 
 We begin by generalizing the definition of ranks we gave in section~\ref{sec_theory} to arbitrary weak orders.  If $\leqslant$ is a weak order on $[p]$, we define the rank of $j$ with respect to $\leqslant$, denoted as $r_\leqslant(j)$, to be $\sum_{i = 1}^n \ind{i \leqslant j}$.  Given a partial order $\preceq$ on $[p]$, we can then define the rank set of $j$ as the set of values $r_\leqslant(j)$ such that $\leqslant$ is a weak extension of $\preceq$.  We note, however, that if $\preceq$ has a weak extension $\leqslant$ such that $r_\leqslant(j) = r$, then it has a linear extension that assigns rank $r$ to $j$ as well.  Therefore when defining the rank sets of $\preceq$ it is sufficient to consider the linear extensions of $\preceq$.
 
@@ -299,6 +298,7 @@ $j_5$&$5$&$[3, 5]$\\
 We might hope that the converse of Corollary~\ref{cor_weak_ord_rank_compat} is true.  Unfortunately this is not the case.  Consider the order on the set $\{j_1, \dots, j_5\}$ given by $j_1 \prec j_4$, $j_1 \prec j_5$ and $j_2 \prec j_5$.  The linear order defined by $j_3 \leqslant j_4 \leqslant j_1 \leqslant j_2 \leqslant j_5$ is rank compatible with $\preceq$ but is not a linear extension because it has $j_4 \leqslant j_1$ while $j_1 \prec j_4$.  See Table~\ref{tab_rank_int_counter} for the rank intervals of $\preceq$.
 
 \subsection{Computing the Rank Intervals of the Sample Interval Order}
+\label{subsec_rank_int_compute}
 
 The rank intervals of $\iord$ will be used in all of the methods we will consider so we will now describe how to compute them efficiently.  While they can be computed from the row and column sums of $\mat{\iord}$, this requires us to compare every pair of elements directly.  By exploiting transitivity, we can instead compute the rank intervals with a single pass over the sorted endpoints of the interval estimates.  The method to do so is given in Algorithm~\ref{algo_rank_int}, and we analyze its correctness and performance in Theorem~\ref{thm_algo_rank_int}.
 
@@ -338,8 +338,9 @@ The running time of the algorithm is dominated by the cost of sorting the endpoi
 \end{algorithm}
 
 \subsection{Rank Intervals as Ranks}
+\label{subsec_rank_int_rank}
 
-We close our discussion of rank intervals by arguing that the rank intervals of an interval order are the natural generalization of ranks beyond the class of weak orders.  We begin with a question: what does it mean for two elements of an ordered set to have the same rank?  Although there is a standard notion discussed in~\cite{stanley2011book}, it is only defined for a fairly special class of orders, and it fails to capture what I believe is the basic idea.  In my opinion, when we say that two elements of an ordered set have the same rank, we mean that they are in some sense in the same position.  Our goal in the remainder of this section will be to make this intuition precise.
+We close our discussion of rank intervals by arguing that the rank intervals of an interval order are the natural generalization of ranks beyond the class of weak orders.  We begin with a question: what does it mean for two elements of an ordered set to have the same rank?  Although there is a standard notion discussed in~\cite{stanley2011book}, it is only defined for a fairly special class of orders, and it fails to capture what I believe is the essence of a notion of rank.  In my opinion, when we say that two elements of an ordered set have the same rank, we mean that they are in some sense in the same position.  Our goal in the remainder of this section will be to make this intuition precise.
 
 To do so, we will need the notion of an order automorphism.  If $(S_1, \preceq_1)$ and $(S_2, \preceq_2)$ are ordered sets, we say that a bijection $\phi : S_1 \rightarrow S_2$ is an order isomorphism when $s \preceq_1 t$ if and only if $\phi(s) \preceq_2 \phi(t)$.  An order automorphism is an order isomorphism where $S_1 = S_2$ and $\preceq_1 = \preceq_2$.
 
@@ -370,7 +371,7 @@ In light of Theorem~\ref{thm_rank_int_rank}, I regard the rank intervals as the 
 \section{Set Estimation}
 \label{sec_conf_set}
 
-We turn now from the general theory to specific problems related to rank estimation.  Set estimation has received the most attention in the previous literature, so we will begin there.  In this section we will assume that $\hat{I}_1, \dots, \hat{I}_p$ are confidence intervals with joint coverage probability at least $1 - \alpha$.  Under this assumption, I first give a new order-theoretic proof of the main result in~\cite{klein2020jointCR} and then show that $\WE{\iord}$ is a valid confidence set as well.  I close with a discussion of some computational matters that must be considered for a complete theory
+We turn now from the general theory to specific problems related to rank estimation.  Set estimation has received the most attention in the previous literature, so we will begin there.  We will first consider the main result in~\cite{klein2020jointCR} from an order-theoretic perspective and then examine the performance of $\WE{\iord}$ as a set estimate.  We will close with a discussion of some computational matters that must be considered for a complete theory.  In this section we will assume that $\hat{I}_1, \dots, \hat{I}_p$ are confidence intervals with joint coverage probability at least $1 - \alpha$.
 
 We will begin by proving a lemma that forms the basis of the analysis in this section.
 
@@ -383,7 +384,7 @@ $\pord$ is an extension of $\iord$ if $\theta_j \in \hat{I}_j$ for all $j$.  The
 \end{proof}
 
 \noindent
-It is possible, however, that $\pord$ is an extension of $\iord$ even if no interval estimate covers its target parameter.  That implies that the methods we will discuss here and any other methods based on the interval estimates are inherently conservative.
+It is possible, however, that $\pord$ is an extension of $\iord$ even if no interval estimate covers its target parameter.  That implies that the methods we will discuss here and any other methods based solely on the interval estimates are inherently conservative.
 
 We begin by considering the confidence set described in~\cite{klein2020jointCR}.  In our terms, this set is the product of the rank intervals.  We begin with an order-theoretic proof that this is a valid confidence set.
 
@@ -398,7 +399,7 @@ The product set contains a ranking $\mathbf{r}$ if and only if $\rord$ is rank c
 \noindent
 As noted in~\cite{klein2020jointCR}, Theorem~\ref{thm_product_set} implies that the rank intervals are valid simultaneous confidence intervals for the individual ranks.  Although these may be conservative, any interval estimates of the population ranks that differ from the rank intervals will either include rankings which are not compatible with the interval estimates or exclude rankings that are.  Understanding the principles by which they do so and maintain the desired coverage probability may lead to new insights.
 
-In section~\ref{sec_rank_int} we observed that orders which are not extensions of $\iord$ may be rank compatible with it.  Therefore the product set may contain rankings that are not compatible with the interval estimates.  $\WE{\iord}$, on the other hand, does not contain any orders which correspond to rankings that are not compatible with the interval estimates, so if it has the correct coverage probability it is an appealing alternative.  I will now show that this is the case.
+In section~\ref{sec_rank_int} we observed that orders which are not extensions of $\iord$ may be rank compatible with it.  Therefore the product set may contain rankings that are not compatible with the interval estimates.  $\WE{\iord}$, on the other hand, does not contain any orders which correspond to rankings that are not compatible with the interval estimates, so if it has the correct coverage probability it is an appealing alternative.  We will now see that this is the case.
 
 \begin{theorem}
 \label{thm_conf_set_weak_ext}
@@ -466,7 +467,7 @@ In this section we will first discuss the asymptotics of $\iord$ and the conditi
 Because we are discussing the consistency of estimators, we must explicitly denote their dependence on the sample size.  We will write the value of $\hat{I}_j$ after $n$ observations as $\hat{I}_{j, n}$ and the collection of these intervals as $\hat{\mathcal{I}}_n$.
 
 \subsection{Asymptotics of the Sample Interval Order}
-\label{subsec_asymp}
+\label{subsec_point_est_asymp}
 
 In this section we will examine the behavior of $\iordn$ in the large sample limit.  We will begin by discussing when $\iordn$ may be said to be a consistent estimator of $\pord$.  In order to do so, we must first consider in what sense $\iordn$ can be said to converge to $\pord$.  A metric space is the usual setting for considering questions of convergence, so if we can find a metric on the set of partial orders on $[p]$ we can proceed with standard machinery.  Fortunately the hard work has already been done, and we can rely on a result from~\cite{bogart1973distance}.
 
@@ -531,7 +532,7 @@ $\delta_H(\WE{\iordn}, \pord)$ can only be positive when $\ind{j_1 \iordn j_2} \
 \end{proof}
 
 \subsection{Consistent Point Estimators for the Parameter Ranks}
-\label{subsec_point_consist}
+\label{subsec_point_est_consist}
 
 We have shown that $\iordn$ is a consistent estimator of $\pord$ under suitable regularity conditions.  We will now use these results to show that the sample ranks are consistent whenever $\pord$ is a linear order and to provide a consistent integer-valued estimator of $\rankp$ without any restrictions on $\rankp$.
 
@@ -562,7 +563,7 @@ Let $\pord$ be a linear order and let $\hat{\theta}_j$ be a consistent estimator
 Define $\hat{I}_{j, n} = [\hat{\theta}_j - 1 / n, \hat{\theta}_j + 1 / n]$.  These are weakly consistent interval estimates, so by Theorem~\ref{thm_consist_linear}, $\iordn$ is a consistent estimator of $\pord$.  We can then apply Theorem~\ref{thm_rank_int_consist} to conclude that $I_\iordn(j)$ converges to $I_\pord(j)$ in probability.  However as $n$ becomes large we also have that $I_\iordn(j)$ converges to the sample rank of $\theta_j$ by the argument given in the proof of Theorem~\ref{thm_consist_linear}.  The result follows immediately.
 \end{proof}
 
-We now turn to the problem of estimating $r_\pord(j)$ when $\pord$ is not assumed to be a linear order.  Although by Theorem~\ref{thm_rank_int_consist} we could in principle present the rank intervals as rank estimates, it is traditional to present numeric estimates, and so we will describe one method for doing so.
+We now turn to the problem of estimating $r_\pord(j)$ when $\pord$ is not assumed to be a linear order.  Although based on the discussion in section~\ref{subsec_rank_int_rank} we could reasonably present the rank intervals as rank estimates, it is traditional to present numeric estimates, and so we will describe one method for doing so.  Although a method was previously proposed in~\cite{xie2009ties}, it does not in general produce integer-valued ranks, but the method we describe here does.
 
 We have defined the rank of an element with respect to a weak order to be the left endpoint of its rank interval, so the obvious choice for $\hat{r}_j$ is $\ell(I_\iordn(j))$.  However, if $\iordn$ is not a weak order, the resulting vector need not be the ranking of any data (as is the case for the order shown in Table~\ref{tab_rank_int_counter}).  Therefore we will take $\hat{\mathbf{r}}$ to be $\mathbf{r}(\ell(I_\iordn(1)), \dots, \ell(I_\iordn(p)))$.  If $\iordn$ is a weak order then $\hat{r}_j = \ell(I_\iordn(j))$, and if $\iordn$ is consistent for $\pord$ then the probability that $\iordn$ is not a weak order converges to zero by Theorem~\ref{thm_rank_int_consist}, so this is a consistent estimator.  We will refer to these values as the \emph{sample interval order ranks}.
 
@@ -570,12 +571,13 @@ While the sample interval order ranks are consistent under the hypotheses of The
 
 \section{Uncertainty Quantification}
 \label{sec_uncert_quant}
-We will now finish our discussion of the problem of rank estimation by considering the problem of uncertainty quantification.  We will first discuss the properties that a measure of uncertainty for estimated ranks should have, and then I will propose a simple and interpretable measure of uncertainty.
+
+We will now finish our discussion of the problem of rank estimation by considering the problem of uncertainty quantification.  We will first discuss the properties that a measure of uncertainty for estimated ranks should have, and then consider a simple and interpretable measure of uncertainty.
 
 It is important to note that what follows is only a partial solution to the problem of quantifying uncertainty in ranks.  The uncertainty in the ranks of the parameters we consider here is conditional on the event that the interval estimates cover the true parameters.  Further work is needed to define appropriate measures of unconditional uncertainty for the true ranking.
 
 \subsection{Properties of a Measure of Uncertainty}
-\label{subsec_measure_uncert_prop}
+\label{subsec_uncert_quant_prop}
 
 We will open with two observations that will motivate the properties we require of a measure of uncertainty.  First, if $\iord$ is a linear order then we know $\pord$ regardless of how well we have estimated the parameter values themselves.  Second, decreasing the width of the interval estimates can never increase the uncertainty in our estimate of the population ranking.
 
@@ -597,13 +599,13 @@ If $\upsilon$ is an uncertainty measure we must have $\upsilon(\eord) > 0$ and $
 Finally, we may also want $\upsilon(\iord) = \upsilon(\dual{\iord})$.  If we have a measure of uncertainty $\upsilon$ which does not have this property we can define the symmetrized measure $\upsilon_s$ by $\upsilon_s(\iord) = (\upsilon(\iord) + \upsilon(\dual{\iord}))/2$.
 
 \subsection{A Measure of Uncertainty}
-\label{subsec_measure_uncert_cand}
+\label{subsec_uncert_quant_cand}
 
 What shall we take to be our measure of uncertainty?  The most obvious candidate is $|WE{\iord}|$, but the problem of computing the number of weak extensions of a partial order does not seem to have been considered previously.  There is, however, an extensive literature on counting linear extensions (see~\cite{talvitie2018scalableScheme} and references therein).  The problem is intractable in general but arbitrarily good approximation algorithms exist, and it is not currently known whether counting the linear extensions of an interval order is intractable.
 
-Computational issues aside, however, $|\LE{\iord}|$ and $|\WE{\iord}|$ are difficult to interpret.  Additionally, $|\LE{\eord}| = p!$, so unless the interval estimates are wide relative to the distances between the true parameters, the normalized count will be very small.  The problem is worse if we look at counting weak extensions: $|WE{\eord}|$ is given by the $p$th ordered Bell number~\citepalias{oeis2023seqA000670}, and these values are much larger than $p!$.  While $|\WE{\iord}|$ will generally be larger than $|\LE{\iord}|$, it is unlikely to be larger by enough to offset the larger normalization constant.
+Computational issues aside, however, $|\LE{\iord}|$ and $|\WE{\iord}|$ are difficult to interpret.  Additionally, $|\LE{\eord}| = p!$, so unless the interval estimates are wide relative to the distances between the true parameters, the normalized count will be very small.  The problem is worse if we look at counting weak extensions: $|WE{\eord}|$ is given by the $p$th ordered Bell number~\citepalias{oeisA000670}, and these values are much larger than $p!$.  While $|\WE{\iord}|$ will generally be larger than $|\LE{\iord}|$, it is unlikely to be larger by enough to offset the larger normalization constant.
 
-Based on my experimentation with different measures, I believe that a measure of uncertainty where $\upsilon(\eord)$ grows like $p$ is most easily interpretable.  The approach I recommend is based on the observation that in many applications where we estimate ranks we are primarily concerned with accurately estimating the ranks of the top $k$ parameters.  We will therefore consider a measure based on how much information we have regarding the top $k$ parameters based on all the rankings that are compatible with the interval estimates.
+Based on my experimentation with different measures, I believe that a measure of uncertainty where $\upsilon(\eord)$ grows like $p$ is most easily interpretable.  The candidate we will consider is based on the observation that in many applications where we estimate ranks we are primarily concerned with accurately estimating the ranks of the top $k$ parameters.  We will therefore consider a measure based on how much information we have regarding the top $k$ parameters based on all the rankings that are compatible with the interval estimates.
 
 We define the top-$k$ set of $\preceq$ as the collection of values $j$ such that $\preceq$ has a linear extension $\leqslant$ with $r_\leqslant(j) \leq k$, and we denote this set as $T_k(\preceq)$.  We then define the excess of $T_k(\preceq)$ as $e_k(\preceq) = |T_k(\preceq)| - k$.  We will now show that any weighted sum of $e_k(\preceq)$ is a measure of uncertainty, but to do so we need one preliminary lemma.
 
@@ -753,9 +755,9 @@ We begin with a presentation of the data.  Table~\ref{tab_data} shows the point 
 
 The symmetrized and normalized average excess for this set of interval estimates is \dataUncertainty.  Because the interval estimate for Comoros is exceptionally wide and intersects a large number of other intervals, we might expect that it is driving the uncertainty to a large degree.  If we exclude it, the symmetrized and normalized average excess drops to \dataSubsetUncertainty.  Omitting any other country's record leads either to a smaller decrease or an increase.  The difference between the total rank uncertainty and the rank uncertainty omitting a given set of records may be a useful measure of how influential that subset is in some sense.
 
-I have also plotted the point estimates and plausible intervals from Table~\ref{tab_data} in Figure~\ref{fig_data}.  The figure makes it clear that Madagascar and Mauritius are estimated to rank below all the other countries regardless of the actual values of the rank estimates.  We see a similar pattern in the data considered in~\cite{klein2020jointCR} where there are values that separate groups of intervals, and this topic deserves further consideration.
+The point estimates and plausible intervals from Table~\ref{tab_data} are also shown in Figure~\ref{fig_data}.  The figure makes it clear that Madagascar and Mauritius are estimated to rank below all the other countries regardless of the actual values of the rank estimates.  We see a similar pattern in the data considered in~\cite{klein2020jointCR} where there are values that separate groups of intervals, and this topic deserves further consideration.
 
-I do not plot the rank intervals as was done in~\cite{klein2020jointCR} because it is difficult to determine the order relation by examining them.  Even for the small order shown in Table~\ref{tab_rank_int_counter} it would take some care to determine that $1 < 4$ given only the rank intervals.
+I do not recommend plotting the rank intervals as was done in~\cite{klein2020jointCR} because it is difficult to determine the order relation by visually examining them.  Even for the small order shown in Table~\ref{tab_rank_int_counter} it would take some care to determine that $1 < 4$ given only the rank intervals.
 
 \bibliographystyle{apalike}
 \bibliography{OrderPerspRankEst}
